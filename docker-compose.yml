@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: fin-chat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: finchat
+      POSTGRES_PASSWORD: finchat
+      POSTGRES_DB: finchat
+    ports:
+      - "5433:5432"
+    volumes:
+      - fin-chat-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finchat -d finchat"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  fin-chat-pgdata:
