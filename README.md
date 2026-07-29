@@ -4,6 +4,7 @@ A ChatGPT-style chat interface for simple financial questions. An LLM understand
 request and picks a backend function; **the backend performs every calculation**. The
 model never produces a financial figure of its own.
 
+
 ```
 User message
   → LLM detects intent + extracts parameters   (Gemini function calling)
