@@ -1,7 +1,12 @@
 import type { ApiErrorBody, ChatResponse, FinancialProduct } from './types';
 
-/** Requests go to the same origin; Vite proxies /api to the backend in dev. */
-const BASE = '/api';
+/**
+ * In dev, Vite proxies /api to the backend on the same origin (see vite.config.ts).
+ * In production the frontend and backend are deployed as separate services, so
+ * VITE_API_URL (set at build time to the backend's hostname) is required.
+ */
+const apiHost = import.meta.env.VITE_API_URL as string | undefined;
+const BASE = apiHost ? `https://${apiHost}/api` : '/api';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;

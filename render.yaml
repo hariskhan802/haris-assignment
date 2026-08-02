@@ -1,0 +1,50 @@
+# Render Blueprint — deploys the whole app from one file.
+# Dashboard: https://dashboard.render.com/blueprints -> New Blueprint Instance
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Database is NOT defined here on purpose: Render's free Postgres expires after
+# 30 days. Use a Neon (neon.tech) free Postgres instead — it has no expiry —
+# and paste its connection string in when Render prompts for DATABASE_URL.
+#
+# Cross-service URLs (CORS_ORIGIN / VITE_API_URL) are set below to the
+# predictable https://<service-name>.onrender.com hostnames. If Render has to
+# suffix a name because it's already taken by someone else, update the two
+# env vars below in the Render dashboard after the first deploy and manually
+# redeploy both services once — see the deploy guide for exact steps.
+
+services:
+  - type: web
+    name: haris-finchat-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run build && npm run db:migrate && npm run db:seed
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false # paste your Neon connection string here
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false # paste your Gemini API key here
+      - key: GEMINI_MODEL
+        value: gemini-flash-lite-latest
+      - key: MAX_TOOL_ROUNDS
+        value: 5
+      - key: CORS_ORIGIN
+        value: haris-finchat-web.onrender.com
+
+  - type: web
+    name: haris-finchat-web
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: haris-finchat-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

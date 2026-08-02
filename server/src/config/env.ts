@@ -38,4 +38,12 @@ export function assertLlmConfigured(): void {
   }
 }
 
-export const corsOrigins = env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean);
+/**
+ * Accepts either a full origin (http://localhost:5173) or a bare hostname
+ * (finchat-web.onrender.com, as produced by Render's `fromService` blueprint
+ * references, which return host only) and normalises the latter to https.
+ */
+export const corsOrigins = env.CORS_ORIGIN.split(',')
+  .map((o) => o.trim())
+  .filter(Boolean)
+  .map((o) => (/^https?:\/\//.test(o) ? o : `https://${o}`));
